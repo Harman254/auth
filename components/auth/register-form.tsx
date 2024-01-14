@@ -1,13 +1,11 @@
-'use client'
+"use client";
+
 import * as z from "zod";
-
-import React from 'react'
-import { CardWrapper } from "@/components/auth/card-wrapper";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { LoginSchema } from "@/schemas";
+import { RegisterSchema } from "@/schemas";
 import { Input } from "@/components/ui/input";
 import {
     Form,
@@ -17,49 +15,44 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Button } from "../ui/button";
-import { FormError } from "../form-error";
-import { FormSuccess } from "../form-success";
-import { Login } from "../../actions/login";
-import { useState, useTransition } from "react";
+import { CardWrapper } from "@/components/auth/card-wrapper"
+import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/form-error";
+import { FormSuccess } from "@/components/form-success";
+import { Register } from "@/actions/register";
 
-
-const LoginForm = () => {
+export const RegisterForm = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
-    const [isPending, startTransition] = useTransition()
+    const [isPending, startTransition] = useTransition();
 
-    const form = useForm<z.infer<typeof LoginSchema>>({
-        resolver: zodResolver(LoginSchema),
+    const form = useForm<z.infer<typeof RegisterSchema>>({
+        resolver: zodResolver(RegisterSchema),
         defaultValues: {
             email: "",
             password: "",
+            name: "",
         },
     });
 
-    const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-
-        setError("")
-        setSuccess("")
+    const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
+        setError("");
+        setSuccess("");
 
         startTransition(() => {
-            Login(values).then(data => {
-                setError(data.error)
+            Register(values)
+                .then((data) => {
+                    setError(data.error);
+                    setSuccess(data.success);
+                });
+        });
+    };
 
-                setSuccess(data.success)
-            })
-
-
-
-        })
-
-
-    }
     return (
         <CardWrapper
-            headerLabel="Welcome back"
-            backButtonLabel="Don't have an account?"
-            backButtonHref="/auth/register"
+            headerLabel="Create an account"
+            backButtonLabel="Already have an account?"
+            backButtonHref="/auth/login"
             showSocial
         >
             <Form {...form}>
@@ -70,6 +63,23 @@ const LoginForm = () => {
                     <div className="space-y-4">
                         <FormField
                             control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            disabled={isPending}
+                                            placeholder="John Doe"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
@@ -77,9 +87,9 @@ const LoginForm = () => {
                                     <FormControl>
                                         <Input
                                             {...field}
+                                            disabled={isPending}
                                             placeholder="john.doe@example.com"
                                             type="email"
-                                            disabled={isPending}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -95,22 +105,11 @@ const LoginForm = () => {
                                     <FormControl>
                                         <Input
                                             {...field}
+                                            disabled={isPending}
                                             placeholder="******"
                                             type="password"
-                                            disabled={isPending}
                                         />
                                     </FormControl>
-                                    <Button
-                                        size="sm"
-                                        variant="link"
-                                        asChild
-                                        className="px-0 font-normal"
-
-                                    >
-                                        <Link href="/auth/reset">
-                                            Forgot password?
-                                        </Link>
-                                    </Button>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -119,15 +118,14 @@ const LoginForm = () => {
                     <FormError message={error} />
                     <FormSuccess message={success} />
                     <Button
+                        disabled={isPending}
                         type="submit"
                         className="w-full"
-                        disabled={isPending}
-                    >Login</Button>
-
+                    >
+                        Create an account
+                    </Button>
                 </form>
             </Form>
         </CardWrapper>
-    )
-}
-
-export default LoginForm
+    );
+};
