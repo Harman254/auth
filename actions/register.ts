@@ -3,13 +3,12 @@
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";
 import { RegisterSchema } from "@/schemas";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import * as z from "zod";
 
 export const Register = async (values: z.infer<typeof RegisterSchema>) => {
   const ValidatedFields = RegisterSchema.safeParse(values);
-  console.log(ValidatedFields);
   if (ValidatedFields.success === false) {
     return { error: "Invalid Fields" };
   }
