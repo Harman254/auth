@@ -1,5 +1,6 @@
 "use server";
 
+import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";
 import { RegisterSchema } from "@/schemas";
 import bcrypt from "bcrypt";
@@ -16,9 +17,7 @@ export const Register = async (values: z.infer<typeof RegisterSchema>) => {
   const { email, password, name } = ValidatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const existingUser = await db.user.findUnique({
-    where: { email },
-  });
+  const existingUser = await getUserByEmail(email);
 
   if (existingUser) {
     return { error: "Email already exists" };
@@ -33,5 +32,5 @@ export const Register = async (values: z.infer<typeof RegisterSchema>) => {
   });
 
   //TODO: Send verification email to user
-  return { success: `${name} account created succesfully` };
+  return { success: `Welcome ${name}! account created succesfully` };
 };
